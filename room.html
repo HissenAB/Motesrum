@@ -22,7 +22,6 @@ html, body {
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
 }
-
 img, a { -webkit-user-drag: none; }
 
 header {
@@ -109,50 +108,63 @@ header {
 .meeting-time { font-weight: 600; }
 .attendees { font-size: 0.85em; color: #555; margin-top: 4px; }
 
-.error {
+#error {
     text-align: center;
     color: #dc3545;
     font-size: 1.8em;
     margin-top: 40px;
 }
 
-#installBtn { display: none; }
+#showWeekBtn, .navWeekBtn {
+    padding:10px 20px; 
+    font-size:1em; 
+    border-radius:5px; 
+    border:none; 
+    background:#1a73e8; 
+    color:white; 
+    cursor:pointer;
+    margin: 5px;
+}
 
 /* Veckovy */
-#weekContainer {
+#weekContainerWrapper {
     display: none;
     flex: 1;
-    gap: 10px;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#weekNav {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
+#weekContainer {
+    display: flex;
+    flex: 1;
+    overflow-x: auto;
+    gap: 15px;
     padding: 10px;
     box-sizing: border-box;
-    overflow: hidden;
-    background: #f0f2f5;
 }
-
-/* Grid för exakt 5 kolumner */
-#weekContainer.grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-}
-
 #weekContainer .column {
+    min-width: 0;
+    flex: 1 1 20%;
     background: white;
     border-radius: 10px;
     box-shadow: 0 6px 15px rgba(0,0,0,0.15);
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    padding: 15px;
     max-height: 100%;
 }
-
 #weekContainer .column h2 {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-size: 1.2em;
     color: #1a73e8;
 }
-
 .week-meeting-card {
     padding: 15px;
     margin-bottom: 12px;
@@ -172,18 +184,6 @@ header {
 }
 .week-meeting-time { font-weight: 700; margin-bottom: 5px; }
 .week-attendees { font-size: 0.85em; color: #555; }
-
-#showWeekBtn {
-    padding: 10px 20px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: none;
-    background: #1a73e8;
-    color: white;
-    cursor: pointer;
-    margin: 10px auto;
-    display: inline-block;
-}
 </style>
 </head>
 <body>
@@ -207,53 +207,42 @@ header {
     </div>
 </div>
 
-<div id="weekContainer" class="grid"></div>
+<div id="weekContainerWrapper">
+    <div id="weekNav">
+        <button class="navWeekBtn" id="prevWeekBtn">&lt; Föregående vecka</button>
+        <button class="navWeekBtn" id="nextWeekBtn">Nästa vecka &gt;</button>
+    </div>
+    <div id="weekContainer"></div>
+</div>
 
 <script>
-if('serviceWorker' in navigator){
+if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then(()=>console.log('Service Worker registrerad'))
     .catch(err=>console.error('Service Worker fel:', err));
 }
 
 const API_URL='https://nodejs-serverless-function-express-beta-dusky.vercel.app/api/roomStatus';
-let weekBaseDate=new Date();
 let inWeekView=false;
+let weekOffset=0; // antal veckor från nu
 
 async function fetchRoomData(roomEmail){
-    try{
+    try {
         const res=await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}`);
         return await res.json();
-    }catch{
+    } catch {
         return {meetings:[], error:"Kunde inte kontakta API"};
     }
 }
 
-function renderMeetings(containerEl, meetingsArr, ongoing=null){
-    containerEl.innerHTML="";
-    meetingsArr.forEach(m=>{
-        const div=document.createElement("div");
-        div.className="meeting-card"+(m===ongoing?" ongoing":"");
-        div.innerHTML=`
-            <div class="meeting-time">
-                ${new Date(m.start.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - 
-                ${new Date(m.end.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}
-            </div>
-            <div>${m.subject}</div>
-            <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name||"Okänd"}</div>
-        `;
-        containerEl.appendChild(div);
-    });
-}
-
+// --- Status ---
 async function updateStatus(){
-    if(inWeekView) return; // ignorera om vi är i veckovy
+    if(inWeekView) return;
     const urlParams=new URLSearchParams(window.location.search);
     const roomEmail=urlParams.get("room");
     const statusEl=document.getElementById("status");
     const todayEl=document.getElementById("todayMeetings");
     const tomorrowEl=document.getElementById("tomorrowMeetings");
     const headerEl=document.querySelector("header");
-    const bookingEl=document.getElementById('bookingInfo');
 
     if(!roomEmail){
         statusEl.style.display="none";
@@ -269,37 +258,52 @@ async function updateStatus(){
         return;
     }
 
-    headerEl.textContent=data.displayName||roomEmail;
+    headerEl.textContent=data.displayName || roomEmail;
     const now=new Date();
-    const meetings=data.meetings||[];
-    const ongoingMeeting=meetings.find(m=>new Date(m.start.dateTime)<=now && now<=new Date(m.end.dateTime));
-    statusEl.textContent=ongoingMeeting?"Upptaget":"Ledigt";
-    statusEl.className=ongoingMeeting?"upptaget":"ledigt";
+    const meetings=data.meetings || [];
+    const ongoing=meetings.find(m=>new Date(m.start.dateTime)<=now && now<=new Date(m.end.dateTime));
+    statusEl.textContent=ongoing ? "Upptaget" : "Ledigt";
+    statusEl.className=ongoing ? "upptaget" : "ledigt";
 
-    bookingEl.textContent=roomEmail?`Bokas via: ${decodeURIComponent(roomEmail)}`:'';
+    const bookingEl=document.getElementById('bookingInfo');
+    bookingEl.textContent=roomEmail ? `Bokas via: ${decodeURIComponent(roomEmail)}` : '';
 
-    const todayStr=now.toDateString();
-    const tomorrow=new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
-    renderMeetings(todayEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===todayStr), ongoingMeeting);
-    renderMeetings(tomorrowEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===tomorrow.toDateString()), ongoingMeeting);
+    function renderMeetings(containerEl, meetingsArr){
+        containerEl.innerHTML="";
+        meetingsArr.forEach(m=>{
+            const div=document.createElement("div");
+            div.className="meeting-card"+(m===ongoing?" ongoing":"");
+            div.innerHTML=`
+                <div class="meeting-time">
+                    ${new Date(m.start.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - 
+                    ${new Date(m.end.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}
+                </div>
+                <div>${m.subject}</div>
+                <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name || "Okänd"}</div>
+            `;
+            containerEl.appendChild(div);
+        });
+    }
+
+    const today=now.toDateString();
+    const tomorrowDate=new Date(now);
+    tomorrowDate.setDate(tomorrowDate.getDate()+1);
+
+    renderMeetings(todayEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===today));
+    renderMeetings(tomorrowEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===tomorrowDate.toDateString()));
 }
 
+// --- Veckovy ---
 function renderWeekMeetings(containerEl, meetingsArr){
     containerEl.innerHTML="";
-    let dayCount=0, i=0;
-    const now=new Date(weekBaseDate);
-    while(dayCount<5){
-        const dayDate=new Date(weekBaseDate);
-        dayDate.setDate(weekBaseDate.getDate()+i);
-        i++;
-        const dayOfWeek=dayDate.getDay();
-        if(dayOfWeek===0||dayOfWeek===6) continue; // hoppa helger
-        dayCount++;
-
+    const now=new Date();
+    now.setDate(now.getDate() + weekOffset*7);
+    for(let i=0;i<5;i++){
+        const dayDate=new Date(now);
+        dayDate.setDate(now.getDate()+i);
         const dayColumn=document.createElement("div");
         dayColumn.className="column";
-        dayColumn.innerHTML=`<h2>${dayDate.toLocaleDateString("sv-SE",{weekday:"short",day:"numeric",month:"numeric"})}</h2>`;
-
+        dayColumn.innerHTML=`<h2>${dayDate.toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"numeric"})}</h2>`;
         const dayDiv=document.createElement("div");
         dayDiv.style.flex="1";
         dayDiv.style.overflowY="auto";
@@ -307,99 +311,91 @@ function renderWeekMeetings(containerEl, meetingsArr){
 
         const dayMeetings=meetingsArr.filter(m=>new Date(m.start.dateTime).toDateString()===dayDate.toDateString());
         dayMeetings.forEach(m=>{
+            const div=document.createElement("div");
             const mStart=new Date(m.start.dateTime);
             const mEnd=new Date(m.end.dateTime);
-            const ongoing=mStart<=new Date() && new Date()<=mEnd;
-            const div=document.createElement("div");
+            const ongoing=mStart<=now && now<=mEnd;
             div.className="week-meeting-card"+(ongoing?" ongoing":"");
             div.innerHTML=`
                 <div class="week-meeting-time">${mStart.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - ${mEnd.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}</div>
                 <div>${m.subject}</div>
-                <div class="week-attendees">Bokad av: ${m.organizer?.emailAddress?.name||"Okänd"}</div>
+                <div class="week-attendees">Bokad av: ${m.organizer?.emailAddress?.name || "Okänd"}</div>
             `;
             dayDiv.appendChild(div);
         });
-
         containerEl.appendChild(dayColumn);
     }
 }
 
-// Bläddra veckor
-function changeWeek(offset){
-    weekBaseDate.setDate(weekBaseDate.getDate()+offset*7);
-    updateWeekView();
-}
-
-async function updateWeekView(){
-    inWeekView=true;
-    document.getElementById("todayTomorrowContainer").style.display="none";
-    document.getElementById("status").style.display="none";
-    document.getElementById("weekContainer").style.display="grid";
+// --- Veckovy-knapp ---
+document.getElementById("showWeekBtn").addEventListener("click", async ()=>{
+    const weekWrapper=document.getElementById("weekContainerWrapper");
+    const weekContainer=document.getElementById("weekContainer");
+    const todayTomorrowContainer=document.getElementById("todayTomorrowContainer");
+    const statusEl=document.getElementById("status");
 
     const urlParams=new URLSearchParams(window.location.search);
     const roomEmail=urlParams.get("room");
-    const headerEl=document.querySelector("header");
-    const bookingEl=document.getElementById('bookingInfo');
-
-    if(!roomEmail){
-        headerEl.textContent="Ingen rumsadress angiven";
-        return;
-    }
-
     const data=await fetchRoomData(roomEmail);
-    if(data.error){
-        headerEl.textContent=roomEmail;
-        bookingEl.textContent="";
-        return;
-    }
 
-    headerEl.textContent=data.displayName||roomEmail;
-    bookingEl.textContent=roomEmail?`Bokas via: ${decodeURIComponent(roomEmail)}`:'';
-
-    renderWeekMeetings(document.getElementById("weekContainer"), data.meetings||[]);
-}
-
-// Veckovy-knapp
-document.getElementById("showWeekBtn").addEventListener("click", ()=>{
     if(!inWeekView){
-        weekBaseDate=new Date();
-        updateWeekView();
-        document.getElementById("showWeekBtn").textContent="Tillbaka till status";
-    }else{
+        inWeekView=true;
+        weekWrapper.style.display="flex";
+        todayTomorrowContainer.style.display="none";
+        statusEl.style.display="none";
+        document.getElementById("showWeekBtn").textContent="Tillbaka till nuvarande status";
+        weekOffset=0;
+        renderWeekMeetings(weekContainer,data.meetings||[]);
+        window.scrollTo({top:0,behavior:"smooth"});
+    } else {
         inWeekView=false;
-        document.getElementById("weekContainer").style.display="none";
-        document.getElementById("todayTomorrowContainer").style.display="flex";
-        document.getElementById("status").style.display="block";
-        document.getElementById("showWeekBtn").textContent="Visa kommande 5 dagar";
-        updateStatus();
-    }
-});
-
-// Scroll-återställning
-let scrollTimer;
-function resetScrollTimerFull(){
-    if(scrollTimer) clearTimeout(scrollTimer);
-    scrollTimer=setTimeout(()=>{
-        inWeekView=false;
-        document.getElementById("weekContainer").style.display="none";
-        document.getElementById("todayTomorrowContainer").style.display="flex";
-        document.getElementById("status").style.display="block";
+        weekWrapper.style.display="none";
+        todayTomorrowContainer.style.display="flex";
+        statusEl.style.display="block";
         document.getElementById("showWeekBtn").textContent="Visa kommande 5 dagar";
         updateStatus();
         window.scrollTo({top:0,behavior:"smooth"});
-    }, 7000);
-}
-
-// Starta scroll-timer
-document.addEventListener("DOMContentLoaded", resetScrollTimerFull);
-['todayMeetings','tomorrowMeetings','weekContainer'].forEach(id=>{
-    const el=document.getElementById(id);
-    el.addEventListener("scroll", resetScrollTimerFull);
+    }
 });
 
+// --- Navigationsknappar ---
+document.getElementById("prevWeekBtn").addEventListener("click", async ()=>{
+    weekOffset--;
+    const roomEmail=new URLSearchParams(window.location.search).get("room");
+    const data=await fetchRoomData(roomEmail);
+    renderWeekMeetings(document.getElementById("weekContainer"),data.meetings||[]);
+});
+document.getElementById("nextWeekBtn").addEventListener("click", async ()=>{
+    weekOffset++;
+    const roomEmail=new URLSearchParams(window.location.search).get("room");
+    const data=await fetchRoomData(roomEmail);
+    renderWeekMeetings(document.getElementById("weekContainer"),data.meetings||[]);
+});
+
+// --- Inaktivitets-timer 15 sek ---
+let inactivityTimer;
+function resetInactivityTimer(){
+    if(inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer=setTimeout(()=>{
+        if(inWeekView){
+            inWeekView=false;
+            document.getElementById("weekContainerWrapper").style.display="none";
+            document.getElementById("todayTomorrowContainer").style.display="flex";
+            document.getElementById("status").style.display="block";
+            document.getElementById("showWeekBtn").textContent="Visa kommande 5 dagar";
+            weekOffset=0;
+        }
+        updateStatus();
+        window.scrollTo({top:0,behavior:"smooth"});
+    },15000);
+}
+['click','scroll','keydown','touchstart'].forEach(evt=>document.addEventListener(evt,resetInactivityTimer));
+resetInactivityTimer();
+
+// --- Start ---
 updateStatus();
 setInterval(updateStatus,60000);
-setInterval(()=>{ const url=new URL(window.location.href); url.searchParams.set('t',Date.now()); window.location.href=url.toString();},30*60*1000);
 </script>
+
 </body>
 </html>
