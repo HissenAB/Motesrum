@@ -4,126 +4,54 @@
 <meta charset="UTF-8">
 <title>Mötesrum Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <style>
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: #f0f2f5;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    margin: 0; padding: 0; height: 100%;
+    background: #f0f2f5; font-family: "Segoe UI", Arial, sans-serif; color: #333;
+    display: flex; flex-direction: column; overflow: hidden;
+    user-select: none;
 }
-
 header {
-    background: #bebfc2;
-    text-align: center;
-    padding: 15px 0;
-    font-size: 1.8em;
-    font-weight: 600;
-    color: #222;
+    background: #bebfc2; text-align: center; padding: 15px 0;
+    font-size: 1.8em; font-weight: 600; color: #222; flex-shrink: 0;
 }
-
 #bookingInfo { text-align:center; font-size:1.5em; color:#555; margin-top:6px; }
-
 #status {
-    font-size: 12em;
-    font-weight:700;
-    text-align:center;
-    margin: 7px auto;
+    font-size: 12em; font-weight:700; text-align:center; margin:7px auto; transition: color 0.3s; flex-shrink:0;
 }
-
 .ledigt { color: #28a745; }
 .upptaget { color: #dc3545; }
-
 .container {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px;
-    gap: 20px;
-    flex: 1;
+    display: flex; justify-content: space-around; margin: 20px; gap: 20px;
+    flex: 1; min-height:0; padding-bottom:20px; box-sizing:border-box;
 }
-
 .column {
-    flex: 1;
-    min-width: 0;
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-    display:flex;
-    flex-direction:column;
+    flex: 1; min-width:0; background:white; padding:15px; border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1); display:flex; flex-direction:column; max-height:100%;
 }
-
-.column h2 {
-    border-bottom:2px solid #1a73e8;
-    padding-bottom:8px;
-    margin-bottom:12px;
-    font-size:1.3em;
-}
-
-#todayMeetings, #tomorrowMeetings {
-    flex:1;
-    overflow-y:auto;
-}
-
-.meeting-card {
-    padding:8px 12px;
-    margin-bottom:8px;
-    border-left:5px solid #1a73e8;
-    background:#f8f9fa;
-    border-radius:5px;
-}
+.column h2 { border-bottom:2px solid #1a73e8; padding-bottom:8px; margin-bottom:12px; font-size:1.3em; font-weight:600; flex-shrink:0;}
+#todayMeetings, #tomorrowMeetings { flex:1; overflow-y:auto; user-select:auto; -webkit-user-select:auto; touch-action: pan-y; }
+.meeting-card { padding:8px 12px; margin-bottom:8px; border-left:5px solid #1a73e8; background:#f8f9fa; border-radius:5px; }
 .meeting-card.ongoing { border-left-color:#dc3545; background:#ffe5e5; }
 .meeting-time { font-weight:600; }
 .attendees { font-size:0.85em; color:#555; margin-top:4px; }
+#error { text-align:center; color:#dc3545; font-size:1.8em; margin-top:40px; }
 
-/* Veckovy */
+#showWeekBtn { padding:10px 20px; font-size:1em; border-radius:5px; border:none; background:#1a73e8; color:white; cursor:pointer; margin:10px auto; display:block; }
+
 #weekContainer {
-    display:none;
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:#f0f2f5;
-    z-index:999;
-    display:flex;
-    overflow-x:auto;
-    gap:15px;
-    padding:10px;
+    display:none; flex:1; overflow-x:auto; gap:15px; padding:10px; box-sizing:border-box;
 }
-
 #weekContainer .column {
-    min-width:250px;
-    flex:0 0 auto;
-    background:white;
-    border-radius:10px;
-    padding:15px;
-    display:flex;
-    flex-direction:column;
+    min-width:250px; flex:0 0 auto; background:white; border-radius:10px; box-shadow:0 6px 15px rgba(0,0,0,0.15);
+    display:flex; flex-direction:column; padding:15px; max-height:100%;
 }
-
-#weekContainer .column h2 {
-    text-align:center;
-    margin-bottom:15px;
-    font-size:1.2em;
-    color:#1a73e8;
-}
-
-.week-meeting-card {
-    padding:15px;
-    margin-bottom:12px;
-    border-left:8px solid #1a73e8;
-    border-radius:8px;
-    background:#f8f9fa;
-}
+#weekContainer .column h2 { text-align:center; margin-bottom:15px; font-size:1.2em; color:#1a73e8; }
+.week-meeting-card { padding:15px; margin-bottom:12px; border-left:8px solid #1a73e8; border-radius:8px; background:#f8f9fa; box-shadow:0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
+.week-meeting-card:hover { transform: translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.15); }
 .week-meeting-card.ongoing { border-left-color:#dc3545; background:#ffe5e5; }
 .week-meeting-time { font-weight:700; margin-bottom:5px; }
 .week-attendees { font-size:0.85em; color:#555; }
-
-#toggleWeekBtn { padding:10px 20px; font-size:1em; cursor:pointer; margin:10px auto; display:block; }
 </style>
 </head>
 <body>
@@ -132,11 +60,11 @@ header {
 <div id="bookingInfo"></div>
 <div id="status">Laddar...</div>
 
-<!-- Knapp för veckovy -->
-<button id="toggleWeekBtn">Visa vecka</button>
+<!-- knapp för veckovy -->
+<button id="showWeekBtn">Visa kommande 7 dagar</button>
 
-<!-- Standardvy: dagens och morgondagens möten -->
-<div class="container">
+<!-- dagens och morgondagens möten -->
+<div class="container" id="todayTomorrowContainer">
     <div class="column" id="todayColumn">
         <h2>Möten idag</h2>
         <div id="todayMeetings"></div>
@@ -147,135 +75,99 @@ header {
     </div>
 </div>
 
-<!-- Veckovy -->
+<!-- veckovy -->
 <div id="weekContainer"></div>
 
 <script>
 const API_URL = 'https://nodejs-serverless-function-express-beta-dusky.vercel.app/api/roomStatus';
-let currentMeetings = [];
 
-const toggleWeekBtn = document.getElementById("toggleWeekBtn");
-const weekContainer = document.getElementById("weekContainer");
-const standardContainer = document.querySelector(".container");
-const statusEl = document.getElementById("status");
-
-toggleWeekBtn.addEventListener("click", () => {
-    if(weekContainer.style.display==="none"){
-        weekContainer.style.display="flex";
-        standardContainer.style.display="none";
-        toggleWeekBtn.textContent="Stäng veckovy";
-        renderWeekMeetings(weekContainer,currentMeetings);
-    } else {
-        weekContainer.style.display="none";
-        standardContainer.style.display="flex";
-        toggleWeekBtn.textContent="Visa vecka";
-    }
-});
-
-async function fetchRoomData(roomEmail){
-    try{
-        const res = await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}`);
-        return await res.json();
-    }catch{
-        return {meetings:[],error:"Kunde inte kontakta API"};
-    }
+async function fetchRoomData(roomEmail) {
+    try { const res = await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}`); return await res.json(); }
+    catch { return {meetings:[],error:"Kunde inte kontakta API"}; }
 }
 
+// render för dagens/morgondagens möten
+function renderMeetings(containerEl, meetingsArr, now){
+    containerEl.innerHTML = "";
+    meetingsArr.forEach(m=>{
+        const mStart = new Date(m.start.dateTime);
+        const mEnd = new Date(m.end.dateTime);
+        const ongoing = mStart<=now && now<=mEnd;
+        const div = document.createElement("div");
+        div.className = "meeting-card"+(ongoing?" ongoing":"");
+        div.innerHTML = `
+            <div class="meeting-time">${mStart.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - ${mEnd.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}</div>
+            <div>${m.subject}</div>
+            <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name||"Okänd"}</div>
+        `;
+        containerEl.appendChild(div);
+    });
+}
+
+// render veckovy
 function renderWeekMeetings(containerEl, meetingsArr){
     containerEl.innerHTML="";
     const now = new Date();
     for(let i=0;i<7;i++){
-        const dayDate = new Date(now);
-        dayDate.setDate(now.getDate()+i);
-
-        const dayColumn = document.createElement("div");
-        dayColumn.className="column";
+        const dayDate = new Date(now); dayDate.setDate(now.getDate()+i);
+        const dayColumn = document.createElement("div"); dayColumn.className="column";
         dayColumn.innerHTML=`<h2>${dayDate.toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"numeric"})}</h2>`;
-
-        const dayDiv = document.createElement("div");
-        dayDiv.style.flex="1";
-        dayDiv.style.overflowY="auto";
-        dayColumn.appendChild(dayDiv);
-
-        const dayMeetings = meetingsArr.filter(m => new Date(m.start.dateTime).toDateString()===dayDate.toDateString());
-
+        const dayDiv=document.createElement("div"); dayDiv.style.flex="1"; dayDiv.style.overflowY="auto"; dayColumn.appendChild(dayDiv);
+        const dayMeetings = meetingsArr.filter(m=>new Date(m.start.dateTime).toDateString()===dayDate.toDateString());
         dayMeetings.forEach(m=>{
+            const mStart=new Date(m.start.dateTime), mEnd=new Date(m.end.dateTime), ongoing=mStart<=now&&now<=mEnd;
             const div=document.createElement("div");
-            const mStart=new Date(m.start.dateTime);
-            const mEnd=new Date(m.end.dateTime);
-            const ongoing=mStart<=now && now<=mEnd;
-
             div.className="week-meeting-card"+(ongoing?" ongoing":"");
             div.innerHTML=`
                 <div class="week-meeting-time">${mStart.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - ${mEnd.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}</div>
                 <div>${m.subject}</div>
-                <div class="week-attendees">Bokad av: ${m.organizer?.emailAddress?.name || "Okänd"}</div>
+                <div class="week-attendees">Bokad av: ${m.organizer?.emailAddress?.name||"Okänd"}</div>
             `;
             dayDiv.appendChild(div);
         });
-
         containerEl.appendChild(dayColumn);
     }
 }
 
+// update status dag/morgon
 async function updateStatus(){
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomEmail = urlParams.get("room");
-    const headerEl = document.querySelector("header");
-    const bookingEl = document.getElementById("bookingInfo");
-    const todayEl = document.getElementById("todayMeetings");
-    const tomorrowEl = document.getElementById("tomorrowMeetings");
+    const urlParams=new URLSearchParams(window.location.search);
+    const roomEmail=urlParams.get("room");
+    const statusEl=document.getElementById("status");
+    const todayEl=document.getElementById("todayMeetings");
+    const tomorrowEl=document.getElementById("tomorrowMeetings");
+    const headerEl=document.querySelector("header");
+    const bookingEl=document.getElementById("bookingInfo");
 
-    if(!roomEmail){
-        headerEl.textContent="Ingen rumsadress angiven";
-        return;
-    }
+    if(!roomEmail){ headerEl.textContent="Ingen rumsadress angiven"; return; }
 
-    const data = await fetchRoomData(roomEmail);
-    if(data.error){
-        headerEl.textContent=roomEmail;
-        bookingEl.textContent='';
-        todayEl.innerHTML=tomorrowEl.innerHTML="";
-        return;
-    }
+    const data=await fetchRoomData(roomEmail);
+    if(data.error){ headerEl.textContent=roomEmail; todayEl.innerHTML=tomorrowEl.innerHTML=""; return; }
 
     headerEl.textContent=data.displayName||roomEmail;
     bookingEl.textContent=`Bokas via: ${decodeURIComponent(roomEmail)}`;
 
     const now=new Date();
     const meetings=data.meetings||[];
-    currentMeetings=meetings;
+    const ongoing=meetings.find(m=>new Date(m.start.dateTime)<=now&&now<=new Date(m.end.dateTime));
+    statusEl.textContent=ongoing?"Upptaget":"Ledigt";
+    statusEl.className=ongoing?"upptaget":"ledigt";
 
-    const ongoing=meetings.find(m=>new Date(m.start.dateTime)<=now && now<=new Date(m.end.dateTime));
-    if(statusEl){
-        statusEl.textContent=ongoing?"Upptaget":"Ledigt";
-        statusEl.className=ongoing?"upptaget":"ledigt";
-    }
-
-    function renderMeetings(containerEl, meetingsArr){
-        containerEl.innerHTML="";
-        meetingsArr.forEach(m=>{
-            const div=document.createElement("div");
-            const mStart=new Date(m.start.dateTime);
-            const mEnd=new Date(m.end.dateTime);
-            const ongoingMeeting=mStart<=now && now<=mEnd;
-            div.className="meeting-card"+(ongoingMeeting?" ongoing":"");
-            div.innerHTML=`
-                <div class="meeting-time">${mStart.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - ${mEnd.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}</div>
-                <div>${m.subject}</div>
-                <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name||"Okänd"}</div>
-            `;
-            containerEl.appendChild(div);
-        });
-    }
-
-    const todayStr=now.toDateString();
-    const tomorrowDate=new Date(now);
-    tomorrowDate.setDate(tomorrowDate.getDate()+1);
-
-    renderMeetings(todayEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===todayStr));
-    renderMeetings(tomorrowEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===tomorrowDate.toDateString()));
+    const today = now.toDateString();
+    const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate()+1);
+    renderMeetings(todayEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===today), now);
+    renderMeetings(tomorrowEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===tomorrowDate.toDateString()), now);
 }
+
+// knapp veckovy
+document.getElementById("showWeekBtn").addEventListener("click", async ()=>{
+    const urlParams=new URLSearchParams(window.location.search);
+    const roomEmail=urlParams.get("room");
+    const data=await fetchRoomData(roomEmail);
+    document.getElementById("todayTomorrowContainer").style.display="none";
+    document.getElementById("weekContainer").style.display="flex";
+    renderWeekMeetings(document.getElementById("weekContainer"), data.meetings||[]);
+});
 
 updateStatus();
 setInterval(updateStatus,60000);
