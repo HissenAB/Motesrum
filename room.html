@@ -352,7 +352,7 @@ document.getElementById("showWeekBtn").addEventListener("click", async ()=>{
         weekWrapper.style.display="none";
         todayTomorrowContainer.style.display="flex";
         statusEl.style.display="block";
-        document.getElementById("showWeekBtn").textContent="Visa kommande 5 dagar";
+        document.getElementById("showWeekBtn").textContent="Visa veckovy";
         updateStatus();
         window.scrollTo({top:0,behavior:"smooth"});
     }
@@ -399,4 +399,5 @@ setInterval(updateStatus,60000);
 
 </body>
 </html>
+
 
