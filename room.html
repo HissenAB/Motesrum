@@ -3,51 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <title>Mötesrum Status</title>
+<link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <style>
 html, body {
-    margin:0; padding:0; height:100%;
-    background:#f0f2f5; font-family:"Segoe UI",Arial,sans-serif; color:#333;
-    display:flex; flex-direction:column; overflow:hidden; user-select:none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f0f2f5;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
-header { background:#bebfc2; text-align:center; padding:15px 0; font-size:1.8em; font-weight:600; color:#222; flex-shrink:0; }
-#bookingInfo { text-align:center; font-size:1.5em; color:#555; margin-top:6px; }
-#status { font-size:12em; font-weight:700; text-align:center; margin:7px auto; transition: color 0.3s; flex-shrink:0; }
-.ledigt { color:#28a745; } .upptaget { color:#dc3545; }
 
-#showWeekBtn, #prevWeekBtn, #nextWeekBtn { padding:10px 20px; font-size:1em; border-radius:5px; border:none; background:#1a73e8; color:white; cursor:pointer; margin:5px; }
-#weekNavigation { text-align:center; margin-bottom:10px; display:none; }
+img, a { -webkit-user-drag: none; }
 
-.container { display:flex; justify-content:space-around; margin:20px; gap:20px; flex:1; min-height:0; padding-bottom:20px; box-sizing:border-box; }
-.column { flex:1; min-width:0; background:white; padding:15px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); display:flex; flex-direction:column; max-height:100%; }
-.column h2 { border-bottom:2px solid #1a73e8; padding-bottom:8px; margin-bottom:12px; font-size:1.3em; font-weight:600; flex-shrink:0;}
-#todayMeetings, #tomorrowMeetings { flex:1; overflow-y:auto; user-select:auto; -webkit-user-select:auto; touch-action: pan-y; }
-.meeting-card { padding:8px 12px; margin-bottom:8px; border-left:5px solid #1a73e8; background:#f8f9fa; border-radius:5px; }
-.meeting-card.ongoing { border-left-color:#dc3545; background:#ffe5e5; }
-.meeting-time { font-weight:600; }
-.attendees { font-size:0.85em; color:#555; margin-top:4px; }
+header {
+    background: #bebfc2;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #222;
+    flex-shrink: 0;
+}
 
-#weekContainer { display:none; flex:1; overflow-x:auto; gap:15px; padding:10px; box-sizing:border-box; }
-#weekContainer .column { min-width:250px; flex:0 0 auto; background:white; border-radius:10px; box-shadow:0 6px 15px rgba(0,0,0,0.15); display:flex; flex-direction:column; padding:15px; max-height:100%; }
-#weekContainer .column h2 { text-align:center; margin-bottom:15px; font-size:1.2em; color:#1a73e8; }
-.week-meeting-card { padding:15px; margin-bottom:12px; border-left:8px solid #1a73e8; border-radius:8px; background:#f8f9fa; box-shadow:0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; }
-.week-meeting-card:hover { transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.15); }
-.week-meeting-card.ongoing { border-left-color:#dc3545; background:#ffe5e5; }
-.week-meeting-time { font-weight:700; margin-bottom:5px; }
-.week-attendees { font-size:0.85em; color:#555; }
+#bookingInfo {
+    text-align: center;
+    font-size: 1.5em;
+    color: #555;
+    margin-top: 6px;
+}
+
+#status {
+    font-size: 12em;
+    font-weight: 700;
+    text-align: center;
+    margin: 7px auto;
+    transition: color 0.3s;
+    flex-shrink: 0;
+}
+
+.ledigt { color: #28a745; }
+.upptaget { color: #dc3545; }
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.column {
+    flex: 1;
+    min-width: 0;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.column h2 {
+    border-bottom: 2px solid #1a73e8;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-size: 1.3em;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+#todayMeetings, #tomorrowMeetings {
+    flex: 1;
+    overflow-y: auto;
+    user-select: auto;
+    -webkit-user-select: auto;
+    touch-action: pan-y;
+}
+
+.meeting-card {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-left: 5px solid #1a73e8;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+.meeting-card.ongoing {
+    border-left-color: #dc3545;
+    background: #ffe5e5;
+}
+
+.meeting-time { font-weight: 600; }
+.attendees { font-size: 0.85em; color: #555; margin-top: 4px; }
+
+.error {
+    text-align: center;
+    color: #dc3545;
+    font-size: 1.8em;
+    margin-top: 40px;
+}
+
+#installBtn {
+    display: none;
+}
+
+/* Veckovy */
+#weekContainer {
+    display: none; 
+    flex: 1; 
+    overflow: hidden;
+    gap: 0; 
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#weekContainer .column {
+    width: 20%; /* fem kolumner fyller skärmen */
+    flex: 0 0 auto; 
+    background: white; 
+    border-radius: 10px; 
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15); 
+    display: flex; 
+    flex-direction: column; 
+    padding: 10px; 
+    max-height: 100%;
+}
+
+#weekContainer .column h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #1a73e8;
+}
+
+.week-meeting-card {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 8px solid #1a73e8;
+    border-radius: 8px;
+    background: #f8f9fa;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.week-meeting-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.week-meeting-card.ongoing {
+    border-left-color: #dc3545;
+    background: #ffe5e5;
+}
+.week-meeting-time { font-weight: 700; margin-bottom: 5px; }
+.week-attendees { font-size: 0.85em; color: #555; }
+
+/* Navigeringsknappar veckovy */
+#weekNav { text-align:center; margin:5px 0; }
+
+#showWeekBtn {
+    padding:10px 20px; 
+    font-size:1em; 
+    border-radius:5px; 
+    border:none; 
+    background:#1a73e8; 
+    color:white; 
+    cursor:pointer;
+}
 </style>
 </head>
 <body>
 
 <header>Mötesrum</header>
-<div id="bookingInfo"></div>
+<div id="bookingInfo" aria-live="polite"></div>
 <div id="status">Laddar...</div>
 
-<button id="showWeekBtn">Visa kommande 7 dagar</button>
-
-<div id="weekNavigation">
-    <button id="prevWeekBtn">&lt; Föregående vecka</button>
-    <button id="nextWeekBtn">Nästa vecka &gt;</button>
+<div style="text-align:center; margin:10px 0;">
+    <button id="showWeekBtn">Visa kommande vecka</button>
 </div>
 
 <div class="container" id="todayTomorrowContainer">
@@ -61,47 +204,117 @@ header { background:#bebfc2; text-align:center; padding:15px 0; font-size:1.8em;
     </div>
 </div>
 
-<div id="weekContainer"></div>
+<div id="weekNav" style="display:none;">
+    <button id="prevWeekBtn">Föregående vecka</button>
+    <button id="nextWeekBtn">Nästa vecka</button>
+</div>
+
+<div class="container" id="weekContainer"></div>
 
 <script>
-const API_URL = 'https://nodejs-serverless-function-express-beta-dusky.vercel.app/api/roomStatus';
-let weekBaseDate = new Date(); // startdatum för veckan
-
-async function fetchRoomData(roomEmail) {
-    try { const res = await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}`); return await res.json(); }
-    catch { return {meetings:[],error:"Kunde inte kontakta API"}; }
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(()=>console.log('Service Worker registrerad'))
+    .catch(err=>console.error('Service Worker fel:',err));
 }
 
-function renderMeetings(containerEl, meetingsArr, now){
-    containerEl.innerHTML = "";
-    meetingsArr.forEach(m=>{
-        const mStart = new Date(m.start.dateTime);
-        const mEnd = new Date(m.end.dateTime);
-        const ongoing = mStart<=now && now<=mEnd;
-        const div = document.createElement("div");
-        div.className = "meeting-card"+(ongoing?" ongoing":"");
-        div.innerHTML = `
-            <div class="meeting-time">${mStart.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - ${mEnd.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}</div>
-            <div>${m.subject}</div>
-            <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name||"Okänd"}</div>
-        `;
-        containerEl.appendChild(div);
-    });
+const API_URL='https://nodejs-serverless-function-express-beta-dusky.vercel.app/api/roomStatus';
+
+let weekBaseDate = new Date(); // startdatum för veckovy
+let resetTimer;
+
+async function fetchRoomData(roomEmail){
+    try {
+        const res = await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}`);
+        return await res.json();
+    } catch { return { meetings: [], error:"Kunde inte kontakta API" }; }
 }
 
+async function updateStatus(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomEmail = urlParams.get("room");
+    const statusEl = document.getElementById("status");
+    const todayEl = document.getElementById("todayMeetings");
+    const tomorrowEl = document.getElementById("tomorrowMeetings");
+    const headerEl = document.querySelector("header");
+
+    if(!roomEmail){
+        statusEl.style.display="none";
+        headerEl.textContent="Ingen rumsadress angiven";
+        return;
+    }
+
+    const data = await fetchRoomData(roomEmail);
+    if(data.error){
+        statusEl.style.display="none";
+        todayEl.innerHTML=tomorrowEl.innerHTML="";
+        headerEl.textContent=roomEmail;
+        return;
+    }
+
+    headerEl.textContent=data.displayName||roomEmail;
+    const now=new Date();
+    const meetings = data.meetings||[];
+    const ongoing = meetings.find(m=>new Date(m.start.dateTime)<=now && now<=new Date(m.end.dateTime));
+    statusEl.textContent=ongoing?"Upptaget":"Ledigt";
+    statusEl.className=ongoing?"upptaget":"ledigt";
+
+    const bookingEl=document.getElementById('bookingInfo');
+    bookingEl.textContent=roomEmail?`Bokas via: ${decodeURIComponent(roomEmail)}`:'';
+
+    function renderMeetings(containerEl, meetingsArr){
+        containerEl.innerHTML="";
+        meetingsArr.forEach(m=>{
+            const div=document.createElement("div");
+            div.className="meeting-card"+(m===ongoing?" ongoing":"");
+            div.innerHTML=`
+                <div class="meeting-time">
+                    ${new Date(m.start.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - 
+                    ${new Date(m.end.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}
+                </div>
+                <div>${m.subject}</div>
+                <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name||"Okänd"}</div>
+            `;
+            containerEl.appendChild(div);
+        });
+    }
+
+    const today = now.toDateString();
+    const tomorrowDate = new Date(now);
+    tomorrowDate.setDate(tomorrowDate.getDate()+1);
+
+    renderMeetings(todayEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===today));
+    renderMeetings(tomorrowEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===tomorrowDate.toDateString()));
+}
+
+updateStatus();
+setInterval(updateStatus,60000);
+
+// Veckovy render
 function renderWeekMeetings(containerEl, meetingsArr){
     containerEl.innerHTML="";
     const now = new Date();
-    for(let i=0;i<7;i++){
-        const dayDate = new Date(weekBaseDate); dayDate.setDate(weekBaseDate.getDate()+i);
+    let dayCount = 0;
+    for(let i=0;i<7 && dayCount<5;i++){
+        const dayDate = new Date(weekBaseDate);
+        dayDate.setDate(weekBaseDate.getDate()+i);
         const dayOfWeek = dayDate.getDay();
-        if(dayOfWeek===0||dayOfWeek===6) continue; // hoppa över helg
-        const dayColumn = document.createElement("div"); dayColumn.className="column";
-        dayColumn.innerHTML=`<h2>${dayDate.toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"numeric"})}</h2>`;
-        const dayDiv=document.createElement("div"); dayDiv.style.flex="1"; dayDiv.style.overflowY="auto"; dayColumn.appendChild(dayDiv);
+        if(dayOfWeek===0||dayOfWeek===6) continue;
+        dayCount++;
+
+        const dayColumn = document.createElement("div");
+        dayColumn.className="column";
+        dayColumn.innerHTML=`<h2>${dayDate.toLocaleDateString("sv-SE",{weekday:"short",day:"numeric",month:"numeric"})}</h2>`;
+
+        const dayDiv=document.createElement("div");
+        dayDiv.style.flex="1";
+        dayDiv.style.overflowY="auto";
+        dayColumn.appendChild(dayDiv);
+
         const dayMeetings = meetingsArr.filter(m=>new Date(m.start.dateTime).toDateString()===dayDate.toDateString());
         dayMeetings.forEach(m=>{
-            const mStart=new Date(m.start.dateTime), mEnd=new Date(m.end.dateTime), ongoing=mStart<=now&&now<=mEnd;
+            const mStart=new Date(m.start.dateTime);
+            const mEnd=new Date(m.end.dateTime);
+            const ongoing=mStart<=now && now<=mEnd;
             const div=document.createElement("div");
             div.className="week-meeting-card"+(ongoing?" ongoing":"");
             div.innerHTML=`
@@ -115,64 +328,49 @@ function renderWeekMeetings(containerEl, meetingsArr){
     }
 }
 
-async function updateStatus(){
-    const urlParams=new URLSearchParams(window.location.search);
-    const roomEmail=urlParams.get("room");
-    const statusEl=document.getElementById("status");
-    const todayEl=document.getElementById("todayMeetings");
-    const tomorrowEl=document.getElementById("tomorrowMeetings");
-    const headerEl=document.querySelector("header");
-    const bookingEl=document.getElementById("bookingInfo");
-
-    if(!roomEmail){ headerEl.textContent="Ingen rumsadress angiven"; return; }
-    const data=await fetchRoomData(roomEmail);
-    if(data.error){ headerEl.textContent=roomEmail; todayEl.innerHTML=tomorrowEl.innerHTML=""; return; }
-
-    headerEl.textContent=data.displayName||roomEmail;
-    bookingEl.textContent=`Bokas via: ${decodeURIComponent(roomEmail)}`;
-    const now=new Date();
-    const meetings=data.meetings||[];
-    const ongoing=meetings.find(m=>new Date(m.start.dateTime)<=now && now<=new Date(m.end.dateTime));
-    statusEl.textContent=ongoing?"Upptaget":"Ledigt";
-    statusEl.className=ongoing?"upptaget":"ledigt";
-
-    const today = now.toDateString();
-    const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate()+1);
-    renderMeetings(todayEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===today), now);
-    renderMeetings(tomorrowEl, meetings.filter(m=>new Date(m.start.dateTime).toDateString()===tomorrowDate.toDateString()), now);
+// Visa veckovy
+async function showWeekView(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomEmail = urlParams.get("room");
+    const data = await fetchRoomData(roomEmail);
+    document.getElementById("todayTomorrowContainer").style.display="none";
+    document.getElementById("status").style.display="none";
+    document.getElementById("showWeekBtn").style.display="none";
+    document.getElementById("weekNav").style.display="block";
+    const weekContainer = document.getElementById("weekContainer");
+    weekContainer.style.display="flex";
+    renderWeekMeetings(weekContainer, data.meetings||[]);
+    startResetTimer();
 }
 
-// Visa veckovy knapp
-document.getElementById("showWeekBtn").addEventListener("click", async ()=>{
-    const urlParams=new URLSearchParams(window.location.search);
-    const roomEmail=urlParams.get("room");
-    const data=await fetchRoomData(roomEmail);
-    document.getElementById("status").style.display="none";
-    document.getElementById("todayTomorrowContainer").style.display="none";
-    document.getElementById("weekContainer").style.display="flex";
-    document.getElementById("weekNavigation").style.display="block";
-    renderWeekMeetings(document.getElementById("weekContainer"), data.meetings||[]);
+// Återställ hela sidan till startläge
+function resetPage(){
+    document.getElementById("todayTomorrowContainer").style.display="flex";
+    document.getElementById("status").style.display="block";
+    document.getElementById("showWeekBtn").style.display="inline-block";
+    document.getElementById("weekNav").style.display="none";
+    document.getElementById("weekContainer").style.display="none";
+    window.scrollTo({top:0, behavior:"smooth"});
+    clearTimeout(resetTimer);
+    startResetTimer();
+}
+
+// Starta timer för automatisk återställning
+function startResetTimer(){
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(resetPage, 30000);
+}
+
+// Scroll/interaction reset
+const scrollContainers = [document.getElementById("todayMeetings"), document.getElementById("tomorrowMeetings")];
+scrollContainers.forEach(container=>{
+    container.addEventListener("scroll", startResetTimer);
 });
 
-// navigeringsknappar
-document.getElementById("prevWeekBtn").addEventListener("click", async ()=>{
-    weekBaseDate.setDate(weekBaseDate.getDate()-7);
-    const urlParams=new URLSearchParams(window.location.search);
-    const roomEmail=urlParams.get("room");
-    const data=await fetchRoomData(roomEmail);
-    renderWeekMeetings(document.getElementById("weekContainer"), data.meetings||[]);
-});
-
-document.getElementById("nextWeekBtn").addEventListener("click", async ()=>{
-    weekBaseDate.setDate(weekBaseDate.getDate()+7);
-    const urlParams=new URLSearchParams(window.location.search);
-    const roomEmail=urlParams.get("room");
-    const data=await fetchRoomData(roomEmail);
-    renderWeekMeetings(document.getElementById("weekContainer"), data.meetings||[]);
-});
-
-updateStatus();
-setInterval(updateStatus,60000);
+document.getElementById("showWeekBtn").addEventListener("click", showWeekView);
+document.getElementById("prevWeekBtn").addEventListener("click",()=>{ weekBaseDate.setDate(weekBaseDate.getDate()-7); showWeekView(); });
+document.getElementById("nextWeekBtn").addEventListener("click",()=>{ weekBaseDate.setDate(weekBaseDate.getDate()+7); showWeekView(); });
 </script>
+
 </body>
 </html>
