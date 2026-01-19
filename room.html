@@ -17,7 +17,6 @@ html, body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -37,10 +36,10 @@ header {
 }
 
 #bookingInfo {
-  text-align: center;
-  font-size: 1.5em;
-  color: #555;
-  margin-top: 10px;
+    text-align: center;
+    font-size: 1.5em;
+    color: #555;
+    margin-top: 10px;
 }
 
 #status {
@@ -110,26 +109,54 @@ header {
 .meeting-time { font-weight: 600; }
 .attendees { font-size: 0.85em; color: #555; margin-top: 4px; }
 
-.error {
-    text-align: center;
-    color: #dc3545;
-    font-size: 1.8em;
-    margin-top: 40px;
-}
+.error { text-align: center; color: #dc3545; font-size: 1.8em; margin-top: 40px; }
 
 #installBtn { display: none; }
 
-/* 7-dagarsvy */
+/* ---- Veckovy ---- */
 #weekContainer {
     display: none;
     overflow-x: auto;
-    flex-wrap: nowrap;
-    margin: 20px 0;
+    gap: 15px;
+    padding: 10px;
 }
 #weekContainer .column {
-    min-width: 220px;
-    margin-right: 10px;
+    min-width: 250px;
+    flex: 0 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
 }
+#weekContainer .column h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #1a73e8;
+}
+
+.week-meeting-card {
+    padding: 15px;
+    margin-bottom: 12px;
+    border-left: 8px solid #1a73e8;
+    border-radius: 8px;
+    background: #f8f9fa;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.week-meeting-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.week-meeting-card.ongoing {
+    border-left-color: #dc3545;
+    background: #ffe5e5;
+}
+.week-meeting-time { font-weight: 700; margin-bottom: 5px; }
+.week-attendees { font-size: 0.85em; color: #555; }
+
 #showWeekBtn {
     padding:10px 20px; 
     font-size:1em; 
@@ -144,7 +171,7 @@ header {
 <body>
 
 <header>Mötesrum</header>
-<div id="bookingInfo" aria-live="polite" style="text-align:center; margin-top:6px;"></div>
+<div id="bookingInfo" aria-live="polite"></div>
 <div id="status">Laddar...</div>
 
 <div style="text-align:center; margin:10px 0;">
@@ -181,7 +208,7 @@ async function fetchRoomData(roomEmail) {
     }
 }
 
-// ---- GLOBAL renderMeetings ----
+// ---- Global renderMeetings för dagens/morgondagens vy ----
 function renderMeetings(containerEl, meetingsArr, ongoing=null) {
     containerEl.innerHTML = "";
     meetingsArr.forEach(m => {
@@ -194,6 +221,24 @@ function renderMeetings(containerEl, meetingsArr, ongoing=null) {
             </div>
             <div>${m.subject}</div>
             <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name || "Okänd"}</div>
+        `;
+        containerEl.appendChild(div);
+    });
+}
+
+// ---- renderWeekMeetings för veckovy ----
+function renderWeekMeetings(containerEl, meetingsArr, ongoing=null) {
+    containerEl.innerHTML = "";
+    meetingsArr.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "week-meeting-card" + (m === ongoing ? " ongoing" : "");
+        div.innerHTML = `
+            <div class="week-meeting-time">
+                ${new Date(m.start.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - 
+                ${new Date(m.end.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}
+            </div>
+            <div>${m.subject}</div>
+            <div class="week-attendees">Bokad av: ${m.organizer?.emailAddress?.name || "Okänd"}</div>
         `;
         containerEl.appendChild(div);
     });
@@ -291,7 +336,7 @@ document.getElementById("showWeekBtn").addEventListener("click", async () => {
             new Date(m.start.dateTime).toDateString() === dayDate.toDateString()
         );
 
-        renderMeetings(dayDiv, dayMeetings);
+        renderWeekMeetings(dayDiv, dayMeetings);
 
         weekContainer.appendChild(dayColumn);
     }
