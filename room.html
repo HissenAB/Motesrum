@@ -18,7 +18,6 @@ html, body {
     flex-direction: column;
     overflow: hidden;
 
-    /* Ingen markering / drag */
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -38,14 +37,14 @@ header {
     color: #222;
     flex-shrink: 0;
 }
-    
+
 #bookingInfo {
   text-align: center;
   font-size: 1.5em;
   color: #555;
   margin-top: 10px;
 }
-    
+
 #status {
     font-size: 12em;
     font-weight: 700;
@@ -123,6 +122,27 @@ header {
 #installBtn {
     display: none;
 }
+
+/* 7-dagarsvy */
+#weekContainer {
+    display: none;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    margin: 20px 0;
+}
+#weekContainer .column {
+    min-width: 220px;
+    margin-right: 10px;
+}
+#showWeekBtn {
+    padding:10px 20px; 
+    font-size:1em; 
+    border-radius:5px; 
+    border:none; 
+    background:#1a73e8; 
+    color:white; 
+    cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -131,7 +151,11 @@ header {
 <div id="bookingInfo" aria-live="polite" style="text-align:center; margin-top:6px;"></div>
 <div id="status">Laddar...</div>
 
-<div class="container">
+<div style="text-align:center; margin:10px 0;">
+    <button id="showWeekBtn">Visa kommande 7 dagar</button>
+</div>
+
+<div class="container" id="todayTomorrowContainer">
     <div class="column" id="todayColumn">
         <h2>Möten idag</h2>
         <div id="todayMeetings"></div>
@@ -141,6 +165,8 @@ header {
         <div id="tomorrowMeetings"></div>
     </div>
 </div>
+
+<div class="container" id="weekContainer"></div>
 
 <script>
 if ('serviceWorker' in navigator) {
@@ -189,13 +215,8 @@ async function updateStatus() {
     statusEl.className = ongoing ? "upptaget" : "ledigt";
 
     const bookingEl = document.getElementById('bookingInfo');
-    if (roomEmail) {
-    const readable = decodeURIComponent(roomEmail);
-    bookingEl.textContent = `Bokas via: ${readable}`;
-    } else {
-    bookingEl.textContent = '';
-    }
-    
+    bookingEl.textContent = roomEmail ? `Bokas via: ${decodeURIComponent(roomEmail)}` : '';
+
     function renderMeetings(containerEl, meetingsArr) {
         containerEl.innerHTML = "";
         meetingsArr.forEach(m => {
@@ -241,12 +262,46 @@ function resetScrollTimer(container) {
 
 scrollContainers.forEach(container => {
     container.addEventListener("scroll", () => resetScrollTimer(container));
-    resetScrollTimer(container); // starta direkt
+    resetScrollTimer(container);
+});
+
+// 7-dagarsknapp
+document.getElementById("showWeekBtn").addEventListener("click", async () => {
+    const weekContainer = document.getElementById("weekContainer");
+    weekContainer.innerHTML = ""; 
+    weekContainer.style.display = "flex"; 
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomEmail = urlParams.get("room");
+    const data = await fetchRoomData(roomEmail);
+    const meetings = data.meetings || [];
+    const now = new Date();
+
+    for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(now);
+        dayDate.setDate(now.getDate() + i);
+
+        const dayColumn = document.createElement("div");
+        dayColumn.className = "column";
+        dayColumn.innerHTML = `<h2>${dayDate.toLocaleDateString("sv-SE", { weekday:"long", day:"numeric", month:"numeric" })}</h2>`;
+
+        const dayDiv = document.createElement("div");
+        dayDiv.style.flex = "1";
+        dayDiv.style.overflowY = "auto";
+        dayColumn.appendChild(dayDiv);
+
+        const dayMeetings = meetings.filter(m => 
+            new Date(m.start.dateTime).toDateString() === dayDate.toDateString()
+        );
+
+        renderMeetings(dayDiv, dayMeetings);
+
+        weekContainer.appendChild(dayColumn);
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 });
 </script>
 
 </body>
 </html>
-
-
-
