@@ -24,9 +24,7 @@ html, body {
     -webkit-tap-highlight-color: transparent;
 }
 
-img, a {
-    -webkit-user-drag: none;
-}
+img, a { -webkit-user-drag: none; }
 
 header {
     background: #bebfc2;
@@ -119,9 +117,7 @@ header {
     margin-top: 40px;
 }
 
-#installBtn {
-    display: none;
-}
+#installBtn { display: none; }
 
 /* 7-dagarsvy */
 #weekContainer {
@@ -185,6 +181,25 @@ async function fetchRoomData(roomEmail) {
     }
 }
 
+// ---- GLOBAL renderMeetings ----
+function renderMeetings(containerEl, meetingsArr, ongoing=null) {
+    containerEl.innerHTML = "";
+    meetingsArr.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "meeting-card" + (m === ongoing ? " ongoing" : "");
+        div.innerHTML = `
+            <div class="meeting-time">
+                ${new Date(m.start.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - 
+                ${new Date(m.end.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}
+            </div>
+            <div>${m.subject}</div>
+            <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name || "Okänd"}</div>
+        `;
+        containerEl.appendChild(div);
+    });
+}
+
+// ---- updateStatus ----
 async function updateStatus() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomEmail = urlParams.get("room");
@@ -217,29 +232,12 @@ async function updateStatus() {
     const bookingEl = document.getElementById('bookingInfo');
     bookingEl.textContent = roomEmail ? `Bokas via: ${decodeURIComponent(roomEmail)}` : '';
 
-    function renderMeetings(containerEl, meetingsArr) {
-        containerEl.innerHTML = "";
-        meetingsArr.forEach(m => {
-            const div = document.createElement("div");
-            div.className = "meeting-card" + (m === ongoing ? " ongoing" : "");
-            div.innerHTML = `
-                <div class="meeting-time">
-                    ${new Date(m.start.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - 
-                    ${new Date(m.end.dateTime).toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}
-                </div>
-                <div>${m.subject}</div>
-                <div class="attendees">Bokad av: ${m.organizer?.emailAddress?.name || "Okänd"}</div>
-            `;
-            containerEl.appendChild(div);
-        });
-    }
-
     const today = now.toDateString();
     const tomorrowDate = new Date(now);
     tomorrowDate.setDate(tomorrowDate.getDate() + 1);
 
-    renderMeetings(todayEl, meetings.filter(m => new Date(m.start.dateTime).toDateString() === today));
-    renderMeetings(tomorrowEl, meetings.filter(m => new Date(m.start.dateTime).toDateString() === tomorrowDate.toDateString()));
+    renderMeetings(todayEl, meetings.filter(m => new Date(m.start.dateTime).toDateString() === today), ongoing);
+    renderMeetings(tomorrowEl, meetings.filter(m => new Date(m.start.dateTime).toDateString() === tomorrowDate.toDateString()), ongoing);
 }
 
 updateStatus();
@@ -250,22 +248,21 @@ setInterval(() => {
   window.location.href = url.toString();
 }, 30 * 60 * 1000);
 
+// ---- scroll reset ----
 const scrollContainers = [document.getElementById("todayMeetings"), document.getElementById("tomorrowMeetings")];
 const scrollTimers = new Map();
-
 function resetScrollTimer(container) {
     if (scrollTimers.has(container)) clearTimeout(scrollTimers.get(container));
     scrollTimers.set(container, setTimeout(() => {
         container.scrollTo({ top: 0, behavior: "smooth" });
     }, 7000));
 }
-
 scrollContainers.forEach(container => {
     container.addEventListener("scroll", () => resetScrollTimer(container));
     resetScrollTimer(container);
 });
 
-// 7-dagarsknapp
+// ---- 7-dagarsknapp ----
 document.getElementById("showWeekBtn").addEventListener("click", async () => {
     const weekContainer = document.getElementById("weekContainer");
     weekContainer.innerHTML = ""; 
