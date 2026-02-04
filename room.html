@@ -230,7 +230,7 @@ async function fetchRoomData(roomEmail){
         const res=await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}`);
         return await res.json();
     } catch {
-        return {meetings:[], error:"Kunde inte kontakta API"};
+        return {meetings:[], error:"API error"};
     }
 }
 
@@ -297,7 +297,7 @@ async function updateStatus(){
 function getMonday(d){
     d=new Date(d);
     const day=d.getDay();
-    const diff=(day===0? -6:1)-day; // måndag är 1, söndag är 0
+    const diff=(day===0? -6:1)-day;
     d.setDate(d.getDate()+diff + weekOffset*7);
     return d;
 }
@@ -387,7 +387,7 @@ document.getElementById("nextWeekBtn").addEventListener("click", async ()=>{
     renderWeekMeetings(document.getElementById("weekContainer"),data.meetings||[]);
 });
 
-// --- Inaktivitets-timer 15 sek ---
+// --- Inaktivitets-timer---
 let inactivityTimer;
 function resetInactivityTimer(){
     if(inactivityTimer) clearTimeout(inactivityTimer);
@@ -402,7 +402,7 @@ function resetInactivityTimer(){
         }
         updateStatus();
         window.scrollTo({top:0,behavior:"smooth"});
-    },15000);
+    },20000);
 }
 ['click','scroll','keydown','touchstart'].forEach(evt=>document.addEventListener(evt,resetInactivityTimer));
 resetInactivityTimer();
@@ -414,6 +414,7 @@ setInterval(updateStatus,60000);
 
 </body>
 </html>
+
 
 
 
