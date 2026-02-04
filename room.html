@@ -294,19 +294,33 @@ async function updateStatus(){
 }
 
 // --- Veckovy ---
+function getMonday(d){
+    d=new Date(d);
+    const day=d.getDay();
+    const diff=(day===0? -6:1)-day; // måndag är 1, söndag är 0
+    d.setDate(d.getDate()+diff + weekOffset*7);
+    return d;
+}
+
 function renderWeekMeetings(containerEl, meetingsArr){
     containerEl.innerHTML="";
-    const now=new Date();
-    now.setDate(now.getDate() + weekOffset*7);
+    const monday=getMonday(new Date());
     for(let i=0;i<5;i++){
-        const dayDate=new Date(now);
-        dayDate.setDate(now.getDate()+i);
+        const dayDate=new Date(monday);
+        dayDate.setDate(monday.getDate()+i);
+
         const dayColumn=document.createElement("div");
         dayColumn.className="column";
+
+        // Markera dagens kolumn
+        const today=new Date();
+        let isToday=dayDate.toDateString()===today.toDateString();
+        dayColumn.style.border=isToday?"2px solid #1a73e8":"";
+        dayColumn.style.backgroundColor=isToday?"#e6f0ff":"";
+
         dayColumn.innerHTML=`<h2>${dayDate.toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"numeric"})}</h2>`;
         const dayDiv=document.createElement("div");
-        dayDiv.style.flex="1";
-        dayDiv.style.overflowY="auto";
+        dayDiv.style.flex="1"; dayDiv.style.overflowY="auto";
         dayColumn.appendChild(dayDiv);
 
         const dayMeetings=meetingsArr.filter(m=>new Date(m.start.dateTime).toDateString()===dayDate.toDateString());
@@ -314,7 +328,7 @@ function renderWeekMeetings(containerEl, meetingsArr){
             const div=document.createElement("div");
             const mStart=new Date(m.start.dateTime);
             const mEnd=new Date(m.end.dateTime);
-            const ongoing=mStart<=now && now<=mEnd;
+            const ongoing=mStart<=new Date() && new Date()<=mEnd;
             div.className="week-meeting-card"+(ongoing?" ongoing":"");
             div.innerHTML=`
                 <div class="week-meeting-time">${mStart.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})} - ${mEnd.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"})}</div>
@@ -353,6 +367,7 @@ document.getElementById("showWeekBtn").addEventListener("click", async ()=>{
         todayTomorrowContainer.style.display="flex";
         statusEl.style.display="block";
         document.getElementById("showWeekBtn").textContent="Visa veckovy";
+        weekOffset=0;
         updateStatus();
         window.scrollTo({top:0,behavior:"smooth"});
     }
@@ -399,6 +414,7 @@ setInterval(updateStatus,60000);
 
 </body>
 </html>
+
 
 
 
