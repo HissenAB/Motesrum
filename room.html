@@ -227,7 +227,7 @@ let weekOffset=0; // antal veckor från nu
 
 async function fetchRoomData(roomEmail){
     try {
-        const res=await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}`);
+        const res=await fetch(`${API_URL}?room=${encodeURIComponent(roomEmail)}&_=${Date.now()}`,{cache:"no-store"})
         return await res.json();
     } catch {
         return {meetings:[], error:"API error"};
@@ -410,10 +410,17 @@ resetInactivityTimer();
 // --- Start ---
 updateStatus();
 setInterval(updateStatus,60000);
+
+// --- auto reload ---
+setInterval(()=>{
+location.reload();
+},1800000);
+
 </script>
 
 </body>
 </html>
+
 
 
 
